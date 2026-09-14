@@ -63,3 +63,30 @@ void SPI_Init(SPI_Handle_t *pSPIHandle) {
 void SPI_DeInit(SPI_RegDef_t *pSPIx) {
 	// TODO
 }
+
+void SPI_SendData(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t Len) {
+	while (Len > 0) {
+		// Polling TXE to check if set
+		while (pSPIx->SR & (1 << 1)) {
+			// check 8 bit or 16 bit DFF
+			if (pSPIx->CR1 & (1 << 11)) {
+				// if 16 bit, we load the DR with 2 bytes of data and decrement Len 2 times
+				pSPIx->DR = *((uint16_t*) pTxBuffer);
+				Len--;
+				Len--;
+				(uint16_t*) pTxBuffer++;
+			} else {
+				// handling 8 bit DFF
+				pSPIx->DR = *pTxBuffer;
+				Len--;
+				pTxBuffer++; // incrementing the TX buffer by 1 byte to point to the next address
+			}
+		}
+	}
+}
+
+
+
+
+
+
