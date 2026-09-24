@@ -73,7 +73,7 @@ typedef struct {
 } SPI_RegDef_t;
 
 
-#define RCC ((RCC_RegDef_t*) 	)
+#define RCC  ((RCC_RegDef_t*) RCC_BASEADDR)
 
 #define SPI1 ((SPI_RegDef_t*) SPI1_BASEADDR)
 #define SPI2 ((SPI_RegDef_t*) SPI2_BASEADDR)
@@ -82,9 +82,9 @@ typedef struct {
 /*
  * Clock enable macros for SPI peripherals
  * */
-#define SPI1_PCLK_EN() (RCC->APB2ENR) |= (1 << 12))
-#define SPI2_PCLK_EN() (RCC->APB1ENR) |= (1 << 14))
-#define SPI3_PCLK_EN() (RCC->APB1ENR) |= (1 << 15))
+#define SPI1_PCLK_EN() ((RCC->APB2ENR) |= (1 << 12))
+#define SPI2_PCLK_EN() ((RCC->APB1ENR) |= (1 << 14))
+#define SPI3_PCLK_EN() ((RCC->APB1ENR) |= (1 << 15))
 
 /*
  * Bit position definitions for SPI_CR1

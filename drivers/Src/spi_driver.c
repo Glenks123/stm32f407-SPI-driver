@@ -1,6 +1,6 @@
 #include <stdint.h>
-#include "stm32f407xx.h"
-#include "spi_driver.h"
+#include "../Inc/stm32f407xx.h"
+#include "../Inc/spi_driver.h"
 
 void SPI_PeriClockControl(SPI_RegDef_t *pSPIx, uint8_t EnorDi) {
 	/*
@@ -48,10 +48,10 @@ void SPI_Init(SPI_Handle_t *pSPIHandle) {
 	// 4. Configure the data frame format
 	tempReg |= pSPIHandle->SPI_Config.SPI_DFF << SPI_CR1_DFF;
 
-	// 5. Configure CPOL
+	// 5. Configure CPHA
 	tempReg |= pSPIHandle->SPI_Config.SPI_CPHA << SPI_CR1_CPHA;
 
-	// 6. Configure SPHA
+	// 6. Configure CPOL
 	tempReg |= pSPIHandle->SPI_Config.SPI_CPOL << SPI_CR1_CPOL;
 
 	// 7. Configure Software Slave Management
@@ -85,8 +85,22 @@ void SPI_SendData(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t Len) {
 	}
 }
 
+void SPI_PeripheralControl(SPI_RegDef_t *pSPIx, uint8_t EnorDi) {
+	// This sets the peripheral as ACTIVE or not, using SPE
+	if (EnorDi == ENABLE) {
+		pSPIx->CR1 |= (1 << SPI_CR1_SPE);
+	} else {
+		pSPIx->CR1 &= ~(1 << SPI_CR1_SPE);
+	}
+}
 
-
+void SPI_SSIConfig(SPI_RegDef_t *pSPIx, uint8_t EnorDi) {
+	if(EnorDi == ENABLE) {
+		pSPIx->CR1 |= (1 << SPI_CR1_SSI);
+	} else {
+		pSPIx->CR1 &= ~(1 << SPI_CR1_SSI);
+	}
+}
 
 
 

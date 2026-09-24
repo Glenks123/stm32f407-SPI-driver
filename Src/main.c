@@ -17,13 +17,91 @@
  */
 
 #include <stdint.h>
+#include <string.h>
+#include "../drivers/Inc/spi_driver.h"
 
 #if !defined(__SOFT_FP__) && defined(__ARM_FP)
   #warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
 #endif
 
+void SPI2_GPIOInits(void) {
+	/*
+	 * This function initializes the GPIO pins for SPI2:
+	 * SPI2_NSS  -> PB12
+	   SPI2_SCK  -> PB13
+	   SPI2_MISO -> PB14
+	   SPI2_MOSI -> PB15
+	   Alternate Function Mode -> 5
+	 * */
+
+	// Enable the GPIOB peripheral clock
+	volatile uint32_t *pRCC_AHB1ENR = (volatile uint32_t*) (0x40023800 + 0x30);
+	*pRCC_AHB1ENR |= (1 << 1);
+
+	// Setting the Pin Modes to ALTERNATE FUNCTION (bits 24-31 -> PB12 to PB15)
+	volatile uint32_t *pGPIOB_MODER = (volatile uint32_t*) (0x40020400 + 0x00);
+	*pGPIOB_MODER &= ~(0xFF000000);
+	*pGPIOB_MODER |= (0xAA000000);
+
+	// Configure Output Type to Push-Pull (bits 12-15)
+	volatile uint32_t *pGPIOB_OTYPER = (volatile uint32_t*) (0x40020400 + 0x04);
+	*pGPIOB_OTYPER &= ~(0x0000F000); // Bit clear = 0 (Push-Pull for PB12-PB15)
+
+	// Configuring speed to High Speed
+	volatile uint32_t *pGPIOB_OSPEEDR = (volatile uint32_t*) (0x40020400 + 0x08);
+	*pGPIOB_OSPEEDR &= ~(0xFF000000);
+	*pGPIOB_OSPEEDR |= (0xAA000000);
+
+	// Configure Pull-Up / Pull-Down to No PUPD (bits 24-31)
+	volatile uint32_t *pGPIOB_PUPDR = (volatile uint32_t*) (0x40020400 + 0x0C);
+	*pGPIOB_PUPDR &= ~(0xFF000000); // Bit clear = 00 (No Pull-Up, No Pull-Down)
+
+	// Configuring AFRH for PB12-PB15 (AFRH12-AFRH15)
+	volatile uint32_t *pGPIOB_AFRH = (volatile uint32_t*) (0x40020400 + 0x24);
+	*pGPIOB_AFRH &= ~(0xFFFF0000);
+	*pGPIOB_AFRH |= (0x55550000);
+}
+
+void SPI2_Inits(void) {
+	/*
+	 * This function initializes the SPI2 peripheral's params
+	 * */
+
+	SPI_Handle_t SPI2handle;
+
+	SPI2handle.pSPIx = SPI2;
+	SPI2handle.SPI_Config.SPI_BusConfig = SPI_BUS_CONFIG_FD;
+	SPI2handle.SPI_Config.SPI_DeviceMode = SPI_DEVICE_MODE_MASTER;
+	SPI2handle.SPI_Config.SPI_SclkSpeed = SPI_SCLK_SPEED_DIV64;//generates sclk of 8MHz
+	SPI2handle.SPI_Config.SPI_DFF = SPI_DFF_8BITS;
+	SPI2handle.SPI_Config.SPI_CPOL = SPI_CPOL_HIGH;
+	SPI2handle.SPI_Config.SPI_CPHA = SPI_CPHA_HIGH;
+	SPI2handle.SPI_Config.SPI_SSM = SPI_SSM_EN; //software slave management enabled for NSS pin
+
+	SPI_Init(&SPI2handle);
+}
+
+
 int main(void)
 {
-    /* Loop forever */
-	for(;;);
+	char user_data[] = "Hello World!";
+
+	// SPI_GPIOInits() function initializes the GPIO pins to behave as SPI2 pins
+	SPI2_GPIOInits();
+
+	SPI_PeriClockControl(SPI2, ENABLE);
+
+	// THis function initializes the SPI2 peripheral params
+	SPI2_Inits();
+
+	SPI_SSIConfig(SPI2, ENABLE);
+
+	// Enable the SPI2 peripheral
+	SPI_PeripheralControl(SPI2, ENABLE);
+
+	SPI_SendData(SPI2, (uint8_t*) user_data, strlen(user_data));
+
+    return 0;
 }
+
+

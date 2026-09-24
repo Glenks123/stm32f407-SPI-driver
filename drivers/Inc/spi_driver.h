@@ -99,5 +99,12 @@ void SPI_DeInit(SPI_RegDef_t *pSPIx);
 void SPI_SendData(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t Len);
 void SPI_Receive(SPI_RegDef_t *pSPIx, uint8_t *RxBuffer);
 
+/*
+ * Peripheral Control
+ * */
+void SPI_PeripheralControl(SPI_RegDef_t *pSPIx, uint8_t EnorDi);
+
+void SPI_SSIConfig(SPI_RegDef_t *pSPIx, uint8_t EnorDi);
+
 
 #endif /* SPI_DRIVER_H_ */
