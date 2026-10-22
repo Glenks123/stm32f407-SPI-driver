@@ -64,12 +64,19 @@ void SPI_DeInit(SPI_RegDef_t *pSPIx) {
 	// TODO
 }
 
+uint8_t SPI_GetFlagStatus(SPI_RegDef_t *pSPIx , uint32_t FlagName) {
+	if(pSPIx->SR & FlagName) {
+		return FLAG_SET;
+	}
+	return FLAG_RESET;
+}
+
 void SPI_SendData(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t Len) {
 	while (Len > 0) {
 		// Polling TXE to check if set
-		while (!(pSPIx->SR & (1 << 1)));
+		while (!(pSPIx->SR & (1 << SPI_SR_TXE)));
 		// check 8 bit or 16 bit DFF
-		if (pSPIx->CR1 & (1 << 11)) {
+		if (pSPIx->CR1 & (1 << SPI_CR1_DFF)) {
 			// if 16 bit, we load the DR with 2 bytes of data and decrement Len 2 times
 			pSPIx->DR = *((uint16_t*) pTxBuffer);
 			Len--;
@@ -80,6 +87,31 @@ void SPI_SendData(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t Len) {
 			pSPIx->DR = *pTxBuffer;
 			Len--;
 			pTxBuffer++; // incrementing the TX buffer by 1 byte to point to the next byte of data
+			// waiting in the RAM array to be transmitted next
+		}
+	}
+
+	// Full duplex: wait for the byte clocked in, and discard it
+	//while (!(pSPIx->SR & (1 << SPI_SR_RXNE)));
+	//(void) pSPIx->DR;
+}
+
+void SPI_ReceiveData(SPI_RegDef_t *pSPIx, uint8_t *pRxBuffer, uint32_t Len) {
+	while (Len > 0) {
+		// Polling RXNE to check if set
+		while (!(pSPIx->SR & (1 << SPI_SR_RXNE)));
+		// check 8 bit or 16 bit DFF
+		if (pSPIx->CR1 & (1 << SPI_CR1_DFF)) {
+			// if 16 bit, we load data from DR to RxBuffer with 2 bytes of data and decrement Len 2 times
+			*((uint16_t*) pRxBuffer) = pSPIx->DR;
+			Len--;
+			Len--;
+			pRxBuffer += 2;
+		} else {
+			// handling 8 bit DFF
+			*(pRxBuffer) = pSPIx->DR;
+			Len--;
+			pRxBuffer++; // incrementing the TX buffer by 1 byte to point to the next byte of data
 			// waiting in the RAM array to be transmitted next
 		}
 	}
@@ -101,6 +133,15 @@ void SPI_SSIConfig(SPI_RegDef_t *pSPIx, uint8_t EnorDi) {
 		pSPIx->CR1 &= ~(1 << SPI_CR1_SSI);
 	}
 }
+
+void SPI_SSOEConfig(SPI_RegDef_t *pSPIx, uint8_t EnorDi) {
+	if(EnorDi == ENABLE) {
+		pSPIx->CR2 |= (1 << SPI_CR2_SSOE);
+	} else {
+		pSPIx->CR2 &= ~(1 << SPI_CR2_SSOE);
+	}
+}
+
 
 
 

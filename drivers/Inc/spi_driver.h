@@ -93,18 +93,37 @@ void SPI_PeriClockControl(SPI_RegDef_t *pSPIx, uint8_t EnorDi);
 void SPI_Init(SPI_Handle_t *pSPIHandle);
 void SPI_DeInit(SPI_RegDef_t *pSPIx);
 
+uint8_t SPI_GetFlagStatus(SPI_RegDef_t *pSPIx , uint32_t FlagName);
+
 /*
  * Data Send and Receive
  */
 void SPI_SendData(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t Len);
-void SPI_Receive(SPI_RegDef_t *pSPIx, uint8_t *RxBuffer);
+void SPI_ReceiveData(SPI_RegDef_t *pSPIx, uint8_t *pRxBuffer, uint32_t Len);
 
 /*
  * Peripheral Control
  * */
 void SPI_PeripheralControl(SPI_RegDef_t *pSPIx, uint8_t EnorDi);
-
 void SPI_SSIConfig(SPI_RegDef_t *pSPIx, uint8_t EnorDi);
+void SPI_SSOEConfig(SPI_RegDef_t *pSPIx, uint8_t EnorDi);
+
+/*
+ * SPI related flag definitions
+ * */
+#define SPI_TXE_FLAG 	(1 << SPI_SR_TXE)
+#define SPI_RXNE_FLAG   (1 << SPI_SR_RXNE)
+#define SPI_BUSY_FLAG   (1 << SPI_SR_BSY)
+
+//some generic macros
+#define ENABLE 				1
+#define DISABLE 			0
+#define SET 				ENABLE
+#define RESET 				DISABLE
+#define GPIO_PIN_SET        SET
+#define GPIO_PIN_RESET      RESET
+#define FLAG_RESET         RESET
+#define FLAG_SET 			SET
 
 
 #endif /* SPI_DRIVER_H_ */
