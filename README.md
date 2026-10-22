@@ -7,7 +7,7 @@ This project demonstrates full-duplex **SPI communication** between an **STM32 m
 ## 1. Hardware Setup & Components
 
 - **SPI Master:** STM32 Board (3.3V logic)
-- **SPI Slave:** Microcontroller / Evaluation Board (5V logic)
+- **SPI Slave:** Arduino UNO (5V logic)
 - **Voltage Translator:** Bi-Directional Logic Level Shifter (3.3V $\leftrightarrow$ 5V)
 - **Logic Analyzer:** USB 24 MHz 8-Channel Logic Analyzer running Saleae Logic 2
 - **Interconnects:** Breadboard, jumper wires, mini-USB / micro-USB cables
